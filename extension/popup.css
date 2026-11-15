@@ -1,0 +1,86 @@
+:root {
+  color-scheme: dark;
+  --surface: #191d1e;
+  --text: #e8ecee;
+  --muted: #b5c1c6;
+  --accent: #91d8ec;
+  --track: #455358;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  width: 328px;
+  margin: 0;
+  background: var(--surface);
+  color: var(--text);
+  font: 14px/1.4 system-ui, sans-serif;
+}
+
+main { padding: 17px 20px 20px; }
+header, .receiver-row, .volume-row { display: flex; align-items: center; }
+header { justify-content: space-between; margin-bottom: 14px; }
+h1 { font-size: 18px; font-weight: 630; margin: 0; }
+p { margin: 0; color: var(--muted); }
+
+button {
+  display: grid;
+  place-items: center;
+  padding: 6px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) { background: #293337; color: var(--text); }
+button:disabled { opacity: .5; cursor: default; }
+.receiver-row { gap: 10px; min-height: 28px; }
+.receiver-row svg { flex: none; color: var(--accent); }
+#device-name { overflow-wrap: anywhere; font-weight: 530; }
+
+select {
+  min-width: 0;
+  max-width: 100%;
+  border: 1px solid var(--track);
+  border-radius: 6px;
+  padding: 4px 6px;
+  color: var(--text);
+  background: var(--surface);
+  font: inherit;
+}
+
+.volume-row { gap: 12px; margin-top: 12px; }
+
+input[type="range"] {
+  --fill: 0%;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  height: 24px;
+  cursor: pointer;
+  appearance: none;
+  background: transparent;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--accent) var(--fill), var(--track) var(--fill));
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-top: -5px;
+  background: var(--accent);
+}
+
+input:disabled { opacity: .45; cursor: default; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+output { min-width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
+#detail { margin-top: 10px; font-size: 12px; }
