@@ -29,7 +29,7 @@ Some streaming services, such as [Pluto TV channels](https://pluto.tv) and [Raku
 
 ## USE
 
-Start casting as usual. Click Cast Volume and move the slider. The receiver
+Start casting as usual. Click the _Cast Volume_ button and move the slider. The receiver
 and current volume should appear within a few seconds. If several receivers
 have active casts, select one by name. Use the refresh button to rescan.
 
