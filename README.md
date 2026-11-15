@@ -49,7 +49,7 @@ receiver certificate. Receiver identity is inferred from local discovery.
 ## UNINSTALL
 
 1. Close the popup.
-2. Go to address `chrome://extensions` and remove Cast Volume extension.
+2. Go to address `chrome://extensions` and remove **Cast Volume** extension.
 3. Uninstall the helper:
     - **Windows:** Double-click `uninstall-helper.cmd`
     - **macOS & Linux:** Run `sh ./install-helper.sh --uninstall`
