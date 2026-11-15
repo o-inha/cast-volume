@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Cast Volume",
+  "version": "1.0.0",
+  "description": "Adjust the volume of a Google Cast receiver during a cast.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1rRF/ieb/ejtF67V5neqmuPog8grb8DdkZCDUpwL3GWuTBOdsSvZIwR9iwih7ScoM+jCXTlZoC7/WoTmrXW5gJ9P7JNt7Lv3xu2l6NKKIA21RRge39+U75PBwH3TQiv4V3kuEAx/VaJWhcm64LTGNu9QLvorKfHPLrfXIucaXMYNPllZOTo8a2ed5JvCKve3DuNLdTumsZOKi6k6KK3IIEdjeTzhc9y6oAzr1Cs+ZclzIeANyH1mIdHRR7RzwmssDZ9SzhwjYWDJzlyryweh0uKo/otsIpr4aVtHB8sc0MU1WlE3WX47DAHQFOj73fd86oqqHe7Xo8WhpDO/8e+DKwIDAQAB",
+  "permissions": ["nativeMessaging"],
+  "icons": {
+    "16": "icons/volume16.png",
+    "32": "icons/volume32.png",
+    "48": "icons/volume48.png",
+    "128": "icons/volume128.png"
+  },
+  "action": {
+    "default_title": "Cast Volume",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/volume16.png",
+      "32": "icons/volume32.png"
+    }
+  }
+}
