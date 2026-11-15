@@ -9,7 +9,7 @@ Chrome extension for Windows 11 (x64), that adds a button to open a small popup 
 
 ### Why?
 
-Some streaming services, such as Pluto TV channels and Rakuten TV channels don't have a volume slider while casting. This Extension fixes the problem. As a unintentional bonus feature: of course, this extension will allow you to adjust current cast volume from any tab, so you do not need to find the casting tab (I didn't even think about this, but it's actually very convenient).
+Some streaming services, such as Pluto TV channels and Rakuten TV channels don't have a volume slider while casting. This Extension fixes the problem. As a unintentional bonus feature: of course, this extension will allow you to adjust current cast volume from any tab, so you do not need to find the casting tab, or even casting device (I didn't even think about this, but it's actually very convenient).
 
 ## INSTALL
 
