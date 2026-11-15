@@ -7,7 +7,7 @@ Chrome extension that adds a button to open a small popup for volume control of 
 
 <img width="536" height="246" alt="image" src="https://github.com/user-attachments/assets/b83fcc25-6b9c-463b-9a77-a39cb89cf198" />
 
-Some streaming services, such as [Pluto TV channels](https://pluto.tv) and [Rakuten TV channels](https://www.rakuten.tv/live_channels) don't have a volume slider while casting. This Extension fixes the problem conveniently. As a unintentional bonus feature: of course, this extension will allow you to adjust current cast volume from any tab, so you do not need to find the casting tab, or even casting device (I didn't even think about this, but it's actually very convenient).
+Some streaming services, such as [Pluto TV channels](https://pluto.tv) and [Rakuten TV channels](https://www.rakuten.tv/live_channels) don't have a volume slider while casting. This Extension fixes the problem conveniently. As a unintentional bonus feature: of course, this extension will allow you to adjust current cast volume from any tab, so you do not need access to the casting tab, or even the casting device.
 
 ### About the helper:
 
