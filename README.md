@@ -47,6 +47,6 @@ receiver certificate. Receiver identity is inferred from local discovery.
 ## FILES
 
 extension/ contains the Chrome extension.
-source/ contains the complete Windows helper source.
-helper/ contains the launcher, installer, and the official Python 3.14.10
-Windows x64 embeddable distribution with its included license notices.
+- source/ contains the complete Windows helper source.
+- helper/ contains the launcher, installer, and the official Python 3.14.10
+- Windows x64 embeddable distribution with its included license notices.
