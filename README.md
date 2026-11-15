@@ -16,7 +16,7 @@ Some streaming services, such as [Pluto TV channels](https://pluto.tv) and [Raku
 1. From the upper right corner of this page, click Code (green button) -> Download ZIP.
 2. Extract the whole ZIP to a folder you can keep.
 3. Double-click `install-helper.cmd` and wait for "Cast Volume helper installed".
-   - Chrome does not expose active Google Cast receivers or their volume levels through its public extension APIs. The helper will retrieve that information from your local network.
+   - Chrome does not expose active Google Cast receivers or their volume levels through its public extension APIs. The extension will use the helper to retrieve that information from your local network.
    - The helper runs once every time you open the volume popup (is **NOT** some background process).
    - The helper installs for your Windows account and includes its own Python runtime.
 5. In Chrome, go to address `chrome://extensions`. Turn on _Developer mode_, click _Load
