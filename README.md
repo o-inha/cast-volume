@@ -3,7 +3,7 @@
 > [!IMPORTANT]  
 > This is a 100% vibe-coded adhoc solution prompted in a few minutes. No human has written a single line of code. 
 
-Chrome extension that adds a button to open a small popup for volume control of current casts of Google Cast devices in local network. Probably works on Edge as well (untested).
+Chrome extension with a small helper that adds a button to open a small popup for volume control of current casts of Google Cast devices in local network. Probably works on Edge as well (untested).
 
 <img width="536" height="246" alt="image" src="https://github.com/user-attachments/assets/b83fcc25-6b9c-463b-9a77-a39cb89cf198" />
 
