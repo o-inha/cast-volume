@@ -3,7 +3,7 @@
 > [!IMPORTANT]  
 > This is a 100% vibe-coded adhoc solution prompted in a few minutes. No human has written a single line of code. 
 
-Chrome extension for Windows 11 (x64), that adds a button to open a small popup for volume control of current casts of Google Cast (Chromecast, etc.) devices in local network.
+Chrome extension for Windows 11 (x64), that adds a button to open a small popup for volume control of current casts of Google Cast devices in local network.
 
 <img width="536" height="246" alt="image" src="https://github.com/user-attachments/assets/b83fcc25-6b9c-463b-9a77-a39cb89cf198" />
 
