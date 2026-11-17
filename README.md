@@ -3,7 +3,7 @@
 > [!IMPORTANT]  
 > This is a 100% vibe-coded adhoc solution prompted in a few minutes. No human has written a single line of code. 
 
-Chrome extension with a small helper that adds a button to open a small popup for volume control of current casts of Google Cast devices in local network. Probably works on Edge and some other browsers as well (untested).
+Chrome extension with a small helper for adjusting the volume of active Google Cast receivers on your local network. Probably works on Edge and some other browsers as well (untested).
 
 <img width="536" height="246" alt="image" src="https://github.com/user-attachments/assets/b83fcc25-6b9c-463b-9a77-a39cb89cf198" />
 
@@ -12,7 +12,7 @@ Some streaming services, such as [Pluto TV channels](https://pluto.tv) and [Raku
 ### About the helper:
 
 - Chrome does not expose active Google Cast receivers or their volume levels through its public extension APIs. The extension will use the included helper to retrieve that information from your local network.
-- Once installed, the helper runs once every time you open the volume popup: it is **NOT** an always-running background process.
+- Once installed, the helper starts when you open Cast Volume. It stays connected while the view is open and exits when you close it.
 
 ## INSTALL
 
@@ -29,9 +29,13 @@ Some streaming services, such as [Pluto TV channels](https://pluto.tv) and [Raku
 
 ## USE
 
-Start casting as usual. Click the _Cast Volume_ button and move the slider. The receiver
-and current volume should appear within a few seconds. If several receivers
-have active casts, select one by name. Use the refresh button to rescan.
+Start casting as usual, then click _Cast Volume_. Each active receiver has its
+own volume slider. Use the refresh button to rescan.
+
+The button next to refresh moves Cast Volume to a separate window, then to
+Chrome's side panel, then back to the toolbar popup. The separate window stays
+open when you switch tabs or focus another window. The full cycle requires
+Chrome 141 or newer.
 
 **macOS only:** allow Local Network access for Chrome if prompted. If discovery
 fails, check _System Settings > Privacy & Security > Local Network_ and allow
@@ -42,8 +46,8 @@ identify which browser started a session. Moving the slider adjusts the Cast
 receiver's own volume. Some TVs and soundbars use a separate volume setting.
 If the popup reports fixed volume, the receiver has disabled software volume.
 
-The helper starts when you open the popup and uses multicast DNS and the
-local Cast protocol. Cast traffic uses encrypted TLS with an unverified
+The helper uses multicast DNS and the local Cast protocol.
+Cast traffic uses encrypted TLS with an unverified
 receiver certificate. Receiver identity is inferred from local discovery.
 
 ## UNINSTALL

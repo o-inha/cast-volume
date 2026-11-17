@@ -5,6 +5,7 @@
   --muted: #b5c1c6;
   --accent: #91d8ec;
   --track: #455358;
+  --divider: #293337;
 }
 
 * { box-sizing: border-box; }
@@ -18,11 +19,16 @@ body {
   font: 14px/1.4 system-ui, sans-serif;
 }
 
+body[data-view="window"], body[data-view="panel"] { width: auto; }
+
 main { padding: 17px 20px 20px; }
-header, .receiver-row, .volume-row { display: flex; align-items: center; }
-header { justify-content: space-between; margin-bottom: 14px; }
+header, .actions, .receiver-row, .volume-row { display: flex; align-items: center; }
+header { justify-content: space-between; gap: 8px; margin-bottom: 14px; }
+.actions { gap: 4px; }
 h1 { font-size: 18px; font-weight: 630; margin: 0; }
 p { margin: 0; color: var(--muted); }
+#view-status { margin-bottom: 10px; }
+#status:not([hidden]) + #view-status { margin-top: 6px; }
 
 button {
   display: grid;
@@ -35,24 +41,20 @@ button {
   cursor: pointer;
 }
 
-button:hover:not(:disabled) { background: #293337; color: var(--text); }
+button:hover:not(:disabled) { background: var(--divider); color: var(--text); }
 button:disabled { opacity: .5; cursor: default; }
-.receiver-row { gap: 10px; min-height: 28px; }
-.receiver-row svg { flex: none; color: var(--accent); }
-#device-name { overflow-wrap: anywhere; font-weight: 530; }
 
-select {
-  min-width: 0;
-  max-width: 100%;
-  border: 1px solid var(--track);
-  border-radius: 6px;
-  padding: 4px 6px;
-  color: var(--text);
-  background: var(--surface);
-  font: inherit;
+#receivers { margin: 0; padding: 0; list-style: none; }
+.receiver + .receiver {
+  border-top: 1px solid var(--divider);
+  padding-top: 10px;
+  margin-top: 10px;
 }
 
-.volume-row { gap: 12px; margin-top: 12px; }
+.receiver-row { gap: 10px; min-height: 24px; }
+.receiver-row svg { flex: none; color: var(--accent); }
+.device-name { overflow-wrap: anywhere; font-weight: 530; }
+.volume-row { gap: 12px; margin-top: 5px; }
 
 input[type="range"] {
   --fill: 0%;
@@ -82,5 +84,5 @@ input[type="range"]::-webkit-slider-thumb {
 
 input:disabled { opacity: .45; cursor: default; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-output { min-width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
-#detail { margin-top: 10px; font-size: 12px; }
+.volume-value { min-width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
+.detail { margin-top: 4px; font-size: 12px; }

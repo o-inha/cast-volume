@@ -6,32 +6,43 @@
   <title>Cast Volume</title>
   <link rel="stylesheet" href="popup.css">
   <script src="popup.js" defer></script>
+  <script src="view-mode.js" defer></script>
 </head>
 <body>
   <main>
     <header>
       <h1>Cast volume</h1>
-      <button id="retry" type="button" aria-label="Refresh receivers" title="Refresh receivers">
-        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 4v5h-5M20 9a8 8 0 1 0 .3 5"/>
-        </svg>
-      </button>
+      <div class="actions">
+        <button id="view-mode" type="button" aria-label="Open in a separate window" title="Open in a separate window">
+          <svg id="view-mode-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 4h6v6m0-6-9 9M10 5H5a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1v-5"/>
+          </svg>
+        </button>
+        <button id="retry" type="button" aria-label="Refresh receivers" title="Refresh receivers">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 4v5h-5M20 9a8 8 0 1 0 .3 5"/>
+          </svg>
+        </button>
+      </div>
     </header>
     <p id="status" role="status">Looking for active casts…</p>
-    <div id="receiver" hidden>
+    <p id="view-status" role="status" hidden></p>
+    <ul id="receivers" aria-label="Active Cast receivers" hidden></ul>
+  </main>
+  <template id="receiver-template">
+    <li class="receiver">
       <div class="receiver-row">
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 8V5h18v14h-6M3 12a7 7 0 0 1 7 7m-7-3a3 3 0 0 1 3 3m-3 0h.01"/>
         </svg>
-        <span id="device-name"></span>
-        <select id="devices" aria-label="Cast receiver" hidden></select>
+        <span class="device-name"></span>
       </div>
       <div class="volume-row">
-        <input id="volume" aria-label="Receiver volume" type="range" min="0" max="100" step="1" value="0" disabled>
-        <output id="value" for="volume">—</output>
+        <input type="range" min="0" max="100" step="1" value="0" disabled>
+        <span class="volume-value" aria-hidden="true">—</span>
       </div>
-    </div>
-    <p id="detail" role="status" hidden></p>
-  </main>
+      <p class="detail" role="status" hidden></p>
+    </li>
+  </template>
 </body>
 </html>
