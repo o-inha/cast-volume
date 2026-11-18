@@ -12,7 +12,7 @@ Some streaming services, such as [Pluto TV channels](https://pluto.tv) and [Raku
 ### About the helper:
 
 - Chrome does not expose active Google Cast receivers or their volume levels through its public extension APIs. The extension will use the included helper to retrieve that information from your local network.
-- Once installed, the helper starts whenever Cast Volume popup is opened. It stays connected while the view is open and exits when you close it. It is **NOT** an always-running background process.
+- Once installed, the helper runs only while the Cast Volume popup is open. It is **NOT** an always-running background process.
 
 ## INSTALL
 
