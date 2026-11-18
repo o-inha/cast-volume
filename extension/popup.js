@@ -1,99 +1,173 @@
 const HOST = 'jp.inha.cast_volume';
 const SCAN_INTERVAL = 2500;
 const REDISCOVER_INTERVAL = 12000;
+const RETRY_INTERVAL = 850;
 
-const ui = Object.fromEntries(
-  ['status', 'retry', 'receiver', 'device-name', 'devices', 'volume', 'value', 'detail']
-    .map(id => [id, document.getElementById(id)])
-);
+const ui = {
+  status: document.getElementById('status'),
+  retry: document.getElementById('retry'),
+  receivers: document.getElementById('receivers'),
+  receiverTemplate: document.getElementById('receiver-template'),
+};
 
+const rows = new Map();
+const pendingVolumes = new Map();
 let port;
 let inFlight;
-let pendingVolume;
+let pendingScan = null;
 let scanTimer;
 let lastDiscovery = 0;
-let receivers = [];
-let selectedId = '';
-let errorMessage = '';
-let errorUntil = 0;
-
-function selectedReceiver() {
-  return receivers.find(receiver => receiver.id === selectedId);
-}
 
 function sameSession(a, b) {
   return a && b && a.id === b.id && a.session === b.session;
 }
 
-function showLevel(level) {
-  ui.volume.value = level ?? 0;
-  ui.volume.style.setProperty('--fill', `${level ?? 0}%`);
-  ui.value.textContent = level == null ? '—' : `${level}%`;
+function currentLevel(receiver) {
+  return receiver.muted ? 0 : receiver.level;
 }
 
-function render() {
-  const receiver = selectedReceiver();
-  const choosing = receivers.length > 1;
-  ui.receiver.hidden = !receivers.length;
-  ui['device-name'].hidden = choosing;
-  ui.devices.hidden = !choosing;
-  if (choosing) {
-    const options = [['', 'Choose a receiver'], ...receivers.map(({id, name}) => [id, name])];
-    const currentOptions = Array.from(ui.devices.options, option => [option.value, option.text]);
-    if (JSON.stringify(options) !== JSON.stringify(currentOptions)) {
-      ui.devices.replaceChildren(...options.map(([value, label]) => new Option(label, value)));
-      ui.devices.options[0].disabled = true;
-    }
-    ui.devices.value = selectedId;
-  } else {
-    ui['device-name'].textContent = receiver?.name ?? '';
+function setText(element, text) {
+  if (element.textContent !== text) element.textContent = text;
+}
+
+function showStatus(element, text) {
+  setText(element, text);
+  element.hidden = !text;
+}
+
+function createRow(receiver) {
+  const element = ui.receiverTemplate.content.firstElementChild.cloneNode(true);
+  const row = {
+    receiver,
+    element,
+    name: element.querySelector('.device-name'),
+    slider: element.querySelector('input'),
+    value: element.querySelector('.volume-value'),
+    detail: element.querySelector('.detail'),
+    drag: null,
+    error: '',
+  };
+  rows.set(receiver.id, row);
+  ui.receivers.append(element);
+
+  row.slider.addEventListener('pointerdown', event => {
+    if (row.slider.disabled || event.button !== 0) return;
+    row.drag = {
+      pointerId: event.pointerId,
+      session: row.receiver.session,
+      level: row.slider.valueAsNumber,
+    };
+  });
+  row.slider.addEventListener('input', () => changeVolume(row));
+  return row;
+}
+
+function renderRow(row) {
+  const {receiver, slider} = row;
+  const pending = pendingVolumes.get(receiver.id);
+  let level = currentLevel(receiver);
+  if (receiver.adjustable) {
+    if (inFlight?.op === 'volume' && sameSession(receiver, inFlight)) level = inFlight.level;
+    if (sameSession(receiver, pending)) level = pending.level;
+    if (row.drag?.session === receiver.session) level = row.drag.level;
   }
 
-  const level = sameSession(receiver, pendingVolume) ? pendingVolume.level
-    : sameSession(receiver, inFlight?.volume) ? inFlight.volume.level
-    : receiver?.muted ? 0 : receiver?.level;
-  showLevel(level);
-  ui.volume.disabled = !receiver?.adjustable;
-  const detail = Date.now() < errorUntil ? errorMessage
-    : receiver?.fixed ? 'This receiver reports fixed volume.'
-    : receiver && !receiver.adjustable ? 'Volume is unavailable on this receiver.'
-    : receiver?.muted ? 'Receiver is muted.' : '';
-  ui.detail.textContent = detail;
-  ui.detail.hidden = !detail;
+  setText(row.name, receiver.name);
+  slider.setAttribute('aria-label', `Volume for ${receiver.name}`);
+  slider.disabled = !receiver.adjustable;
+  if (slider.valueAsNumber !== (level ?? 0)) slider.value = level ?? 0;
+  slider.style.setProperty('--fill', `${level ?? 0}%`);
+  slider.setAttribute('aria-valuetext', level == null ? 'Unavailable' : `${level}%`);
+  setText(row.value, level == null ? '—' : `${level}%`);
+
+  let detail = row.error;
+  if (!detail && receiver.fixed) detail = 'This receiver reports fixed volume.';
+  if (!detail && !receiver.adjustable) detail = 'Volume is unavailable on this receiver.';
+  if (!detail && receiver.muted) detail = 'Receiver is muted.';
+  showStatus(row.detail, detail);
 }
 
-function setStatus(message) {
-  ui.status.textContent = message;
-  ui.status.hidden = !message;
+function syncRows(receivers) {
+  const active = new Set(receivers.map(receiver => receiver.id));
+  for (const [id, row] of rows) {
+    if (active.has(id)) continue;
+    row.element.remove();
+    rows.delete(id);
+    pendingVolumes.delete(id);
+  }
+  for (const receiver of receivers) {
+    const row = rows.get(receiver.id) ?? createRow(receiver);
+    if (!sameSession(row.receiver, receiver)) {
+      pendingVolumes.delete(receiver.id);
+      row.error = '';
+    }
+    row.receiver = receiver;
+    renderRow(row);
+  }
+  ui.receivers.hidden = !rows.size;
 }
 
-function send(message, volume) {
-  window.clearTimeout(scanTimer);
-  inFlight = {message, volume};
+function changeVolume(row) {
+  const {receiver, drag, slider} = row;
+  if (!receiver.adjustable || (drag && drag.session !== receiver.session)) {
+    renderRow(row);
+    return;
+  }
+  const level = slider.valueAsNumber;
+  if (drag) drag.level = level;
+  row.error = '';
+  pendingVolumes.set(receiver.id, {op: 'volume', id: receiver.id, session: receiver.session, level});
+  renderRow(row);
+  sendNext();
+}
+
+function finishDrag(pointerId) {
+  for (const row of rows.values()) {
+    if (!row.drag || (pointerId != null && row.drag.pointerId !== pointerId)) continue;
+    row.drag = null;
+    renderRow(row);
+  }
+}
+
+function send(message) {
+  inFlight = message;
   ui.retry.disabled = true;
-  port.postMessage(message);
+  try {
+    port.postMessage(message);
+  } catch (error) {
+    disconnect(error.message);
+  }
+}
+
+function sendNext() {
+  if (inFlight || !port) return;
+  if (pendingScan != null) {
+    const discover = pendingScan || Date.now() - lastDiscovery >= REDISCOVER_INTERVAL;
+    pendingScan = null;
+    if (discover) lastDiscovery = Date.now();
+    window.clearTimeout(scanTimer);
+    if (discover && !rows.size) showStatus(ui.status, 'Looking for active casts…');
+    send({op: 'scan', discover});
+    return;
+  }
+  for (const [id, volume] of pendingVolumes) {
+    pendingVolumes.delete(id);
+    const receiver = rows.get(id)?.receiver;
+    if (!sameSession(receiver, volume) || !receiver.adjustable || volume.level === currentLevel(receiver)) continue;
+    send(volume);
+    return;
+  }
 }
 
 function requestScan(discover = false) {
-  if (inFlight) return;
+  pendingScan = discover || pendingScan === true;
   if (!port) connect();
-  if (!port) return;
-  discover ||= Date.now() - lastDiscovery >= REDISCOVER_INTERVAL;
-  if (discover) lastDiscovery = Date.now();
-  if (discover && !receivers.length) setStatus('Looking for active casts…');
-  send({op: 'scan', discover});
+  sendNext();
 }
 
-function sendPendingVolume() {
-  if (!port || inFlight || !pendingVolume) return false;
-  const volume = pendingVolume;
-  pendingVolume = null;
-  const receiver = selectedReceiver();
-  if (!sameSession(receiver, volume) || !receiver.adjustable) return false;
-  const current = receiver.muted ? 0 : receiver.level;
-  if (volume.level === current) return false;
-  send({op: 'volume', id: volume.id, session: volume.session, level: volume.level}, volume);
-  return true;
+function scheduleScan(delay) {
+  window.clearTimeout(scanTimer);
+  scanTimer = window.setTimeout(requestScan, delay);
 }
 
 function receive(message) {
@@ -102,66 +176,60 @@ function receive(message) {
   ui.retry.disabled = false;
   if (!request) return;
 
-  if (message.ok && request.message.op === 'scan') {
-    receivers = message.receivers;
-    if (receivers.length === 1) selectedId = receivers[0].id;
-    else if (!selectedReceiver()) selectedId = '';
-    setStatus(receivers.length ? '' : message.found
-      ? 'No active cast found.' : 'No Cast receivers found on this network.');
-  } else if (message.ok) {
-    receivers = receivers.map(receiver => sameSession(receiver, request.volume)
-      ? message.receiver : receiver);
-    errorMessage = '';
-    errorUntil = 0;
-  } else if (request.message.op === 'scan') {
-    receivers = [];
-    selectedId = '';
-    setStatus(message.error);
+  if (request.op === 'scan') {
+    syncRows(message.ok ? message.receivers : []);
+    if (!message.ok) showStatus(ui.status, message.error || 'Could not refresh Cast receivers.');
+    else if (rows.size) showStatus(ui.status, '');
+    else showStatus(ui.status, message.found ? 'No active cast found.' : 'No Cast receivers found on this network.');
+    scheduleScan(message.ok ? SCAN_INTERVAL : RETRY_INTERVAL);
   } else {
-    pendingVolume = null;
-    errorMessage = message.error;
-    errorUntil = Date.now() + 4200;
+    const row = rows.get(request.id);
+    if (row && message.ok && sameSession(request, message.receiver)) {
+      row.receiver = message.receiver;
+      row.error = '';
+      renderRow(row);
+    } else {
+      pendingVolumes.delete(request.id);
+      const error = message.error || 'Could not change the volume. The Cast session may have changed.';
+      if (row) {
+        row.error = error;
+        renderRow(row);
+      } else showStatus(ui.status, error);
+      scheduleScan(RETRY_INTERVAL);
+    }
   }
+  sendNext();
+}
 
-  render();
-  if (sendPendingVolume()) return;
-  scanTimer = window.setTimeout(requestScan, message.ok ? SCAN_INTERVAL : 850);
+function disconnect(error) {
+  port = null;
+  inFlight = null;
+  pendingScan = null;
+  pendingVolumes.clear();
+  window.clearTimeout(scanTimer);
+  ui.retry.disabled = false;
+  syncRows([]);
+  showStatus(ui.status, error.includes('not found') || error.includes('forbidden')
+    ? 'Install the Cast Volume helper, then refresh.'
+    : 'The Cast Volume helper disconnected. Try refreshing.');
 }
 
 function connect() {
-  port = chrome.runtime.connectNative(HOST);
-  port.onMessage.addListener(receive);
-  port.onDisconnect.addListener(() => {
-    const error = chrome.runtime.lastError?.message ?? '';
-    port = null;
-    inFlight = null;
-    pendingVolume = null;
-    receivers = [];
-    selectedId = '';
-    errorUntil = 0;
-    window.clearTimeout(scanTimer);
-    ui.retry.disabled = false;
-    setStatus(error.includes('not found') || error.includes('forbidden')
-      ? 'Install the Cast Volume helper, then refresh.'
-      : 'The Cast Volume helper disconnected. Try refreshing.');
-    render();
-  });
+  try {
+    const connection = chrome.runtime.connectNative(HOST);
+    port = connection;
+    connection.onMessage.addListener(receive);
+    connection.onDisconnect.addListener(() => {
+      const error = chrome.runtime.lastError?.message ?? '';
+      if (port === connection) disconnect(error);
+    });
+  } catch (error) {
+    disconnect(error.message);
+  }
 }
 
 ui.retry.addEventListener('click', () => requestScan(true));
-ui.devices.addEventListener('change', () => {
-  selectedId = ui.devices.value;
-  pendingVolume = null;
-  errorUntil = 0;
-  render();
-});
-ui.volume.addEventListener('input', () => {
-  const receiver = selectedReceiver();
-  if (!receiver?.adjustable) return;
-  pendingVolume = {id: receiver.id, session: receiver.session, level: ui.volume.valueAsNumber};
-  errorUntil = 0;
-  render();
-  sendPendingVolume();
-});
-
+window.addEventListener('pointerup', event => finishDrag(event.pointerId));
+window.addEventListener('pointercancel', event => finishDrag(event.pointerId));
+window.addEventListener('blur', () => finishDrag());
 requestScan(true);
