@@ -1,8 +1,5 @@
 # CAST VOLUME
 
-> [!IMPORTANT]  
-> This is a 100% vibe-coded adhoc solution prompted in a few minutes. No human has written a single line of code. 
-
 Chrome extension with a small helper for adjusting the volume of active Google Cast receivers on your local network. Probably works on Edge and some other browsers as well (untested).
 
 <img width="545" height="245" alt="image" src="https://github.com/user-attachments/assets/2381b6f7-255d-463f-84a9-bb4697d959f9" />
