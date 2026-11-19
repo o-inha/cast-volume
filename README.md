@@ -1,12 +1,12 @@
 # CAST VOLUME
 
+[![Btn Support]][Link Support]
+
 Chrome extension with a small helper for adjusting the volume of active Google Cast receivers on your local network. Probably works on Edge and some other browsers as well (untested).
 
 <img width="545" height="245" alt="image" src="https://github.com/user-attachments/assets/2381b6f7-255d-463f-84a9-bb4697d959f9" />
 
 Some streaming services, such as [Pluto TV channels](https://pluto.tv) and [Rakuten TV channels](https://www.rakuten.tv/live_channels) don't have a volume slider while casting. This extension fixes the problem. It controls the _Cast receiver's_ volume directly, not the _session's_ volume, so it will allow you to adjust current cast volume from any tab, and you do not even need access to the casting tab, browser, or device.
-
-[![Btn Support]][Link Support]
 
 ### About the helper:
 
