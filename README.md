@@ -66,5 +66,5 @@ receiver certificate. Receiver identity is inferred from local discovery.
 - `source/` contains the shared Python helper source.
 - `helper/` contains setup files and the bundled Windows Python runtime and license.
 
-[Btn Support]: https://img.shields.io/badge/☕️_Insist_on_offering_me_a_coffee-323C4C?style=for-the-badge
+[Btn Support]: https://img.shields.io/badge/☕️_Insist_on_offering_me_a_coffee-392659?style=for-the-badge
 [Link Support]: https://buymeacoffee.com/inha
