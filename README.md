@@ -21,7 +21,9 @@ Some streaming services, such as [Pluto TV channels](https://pluto.tv) and [Raku
    - **Windows:** Double-click `install-helper.cmd` and wait for "Cast Volume helper installed".
    - **macOS & Linux:**
      - Prerequisite: [Python 3.10+ with SSL support](https://docs.python.org/3/using/mac.html).
-     - Run `sh ./install-helper.sh` (or `CAST_VOLUME_PYTHON="/absolute/path/to/python3" sh ./install-helper.sh`)
+     - Run `sh ./install-helper.sh` 
+     
+       or: `CAST_VOLUME_PYTHON="/absolute/path/to/python3" sh ./install-helper.sh`
 5. In Chrome, go to address `chrome://extensions`. Turn on _Developer mode_, click _Load
    unpacked_, and choose the extracted extension folder.
 6. Open Chrome's Extensions menu (puzzle icon) and pin _Cast Volume_.
