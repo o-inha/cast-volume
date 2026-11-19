@@ -9,12 +9,12 @@ Chrome extension with a small helper for adjusting the volume of active Google C
 
 Some streaming services, such as [Pluto TV channels](https://pluto.tv) and [Rakuten TV channels](https://www.rakuten.tv/live_channels) don't have a volume slider while casting. This extension fixes the problem. It controls the _Cast receiver's_ volume directly, not the _session's_ volume, so it will allow you to adjust current cast volume from any tab, and you do not even need access to the casting tab, browser, or device.
 
+[![Btn Support]][Link Support]
+
 ### About the helper:
 
 - Chrome does not expose active Google Cast receivers or their volume levels through its public extension APIs. The extension will use the included helper to retrieve that information from your local network.
 - Once installed, the helper runs only while the Cast Volume popup is open. It is **NOT** an always-running background process.
-
-[![Btn Support]][Link Support]
 
 ## INSTALL
 
