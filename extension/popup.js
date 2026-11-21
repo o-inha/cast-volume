@@ -1,6 +1,6 @@
 const HOST = 'jp.inha.cast_volume';
-const SCAN_INTERVAL = 2500;
-const REDISCOVER_INTERVAL = 12000;
+const SCAN_INTERVAL = 10000;
+const REDISCOVER_INTERVAL = 30000;
 const RETRY_INTERVAL = 850;
 const DEMO_MODE = new URLSearchParams(location.search).get('demo') === '1';
 const ORDER_KEY = DEMO_MODE ? 'demoReceiverOrder' : 'receiverOrder';
