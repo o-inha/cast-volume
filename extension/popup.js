@@ -2,7 +2,8 @@ const HOST = 'jp.inha.cast_volume';
 const SCAN_INTERVAL = 2500;
 const REDISCOVER_INTERVAL = 12000;
 const RETRY_INTERVAL = 850;
-const ORDER_KEY = 'receiverOrder';
+const DEMO_MODE = new URLSearchParams(location.search).get('demo') === '1';
+const ORDER_KEY = DEMO_MODE ? 'demoReceiverOrder' : 'receiverOrder';
 
 const ui = {
   status: document.getElementById('status'),
@@ -337,6 +338,10 @@ function disconnect(error) {
 }
 
 function connect() {
+  if (DEMO_MODE) {
+    port = createDemoPort();
+    return;
+  }
   try {
     const connection = chrome.runtime.connectNative(HOST);
     port = connection;
@@ -350,7 +355,52 @@ function connect() {
   }
 }
 
-ui.retry.addEventListener('click', () => requestScan(true));
+function createDemoPort() {
+  const receivers = [
+    {id: 'demo-tv', name: 'Living Room TV', level: 38},
+    {id: 'demo-kitchen', name: 'Kitchen Speaker', level: 24},
+    {id: 'demo-bedroom', name: 'Bedroom Speaker', level: 45},
+    {id: 'demo-downstairs', name: 'Downstairs Speakers', level: 52, isGroup: true},
+    {id: 'demo-home', name: 'Whole Home', level: 30, isGroup: true},
+  ].map(receiver => ({
+    session: receiver.id, muted: false, fixed: false, adjustable: true, isGroup: false, ...receiver,
+  }));
+  return {
+    postMessage(message) {
+      window.setTimeout(() => {
+        if (message.op === 'scan') {
+          receive({ok: true, found: receivers.length, receivers: receivers.map(receiver => ({...receiver}))});
+          return;
+        }
+        const receiver = receivers.find(item => item.id === message.id && item.session === message.session);
+        if (!receiver) {
+          receive({ok: false, error: 'Demo receiver unavailable.'});
+          return;
+        }
+        receiver.level = message.level;
+        receive({ok: true, receiver: {...receiver}});
+      }, 80);
+    },
+  };
+}
+
+if (DEMO_MODE) {
+  document.querySelector('h1').textContent = 'Cast volume demo';
+  ui.retry.setAttribute('aria-label', 'Refresh demo devices');
+}
+ui.retry.title = DEMO_MODE
+  ? 'Refresh demo devices. Shift-click to return to real casts.'
+  : 'Refresh receivers. Shift-click to try demo devices.';
+ui.retry.addEventListener('click', event => {
+  if (event.shiftKey) {
+    const url = new URL(location.href);
+    if (DEMO_MODE) url.searchParams.delete('demo');
+    else url.searchParams.set('demo', '1');
+    location.href = url.href;
+    return;
+  }
+  requestScan(true);
+});
 window.addEventListener('pointerup', event => finishDrag(event.pointerId));
 window.addEventListener('pointercancel', event => finishDrag(event.pointerId));
 window.addEventListener('blur', () => finishDrag());

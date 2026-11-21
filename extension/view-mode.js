@@ -5,6 +5,10 @@
   document.body.dataset.view = mode;
 
   const button = document.getElementById('view-mode');
+  if (params.get('demo') === '1') {
+    button.hidden = true;
+    return;
+  }
   const icon = document.querySelector('#view-mode-icon path');
   const status = document.getElementById('view-status');
   const normalWindows = {windowTypes: ['normal']};

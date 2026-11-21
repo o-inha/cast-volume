@@ -37,6 +37,11 @@ reorder the list. The order is saved across
 the popup, separate window, and side panel, including when a receiver is
 temporarily inactive. You can also focus a handle and use the up/down arrows.
 
+To test the list with dummy devices, hold Shift and click the refresh button.
+Demo mode shows five simulated receivers, including two speaker groups, with
+working sliders and a separate saved order. Shift-click refresh again to
+return to your real casts.
+
 After updating, run the helper setup command again and reload the extension
 at `chrome://extensions` to enable speaker-group detection.
 
