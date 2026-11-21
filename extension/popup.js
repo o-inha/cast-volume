@@ -253,7 +253,6 @@ function finishDrag(pointerId) {
 
 function send(message) {
   inFlight = message;
-  ui.retry.disabled = true;
   try {
     port.postMessage(message);
   } catch (error) {
@@ -295,7 +294,6 @@ function scheduleScan(delay) {
 function receive(message) {
   const request = inFlight;
   inFlight = null;
-  ui.retry.disabled = false;
   if (!request) return;
 
   if (request.op === 'scan') {
@@ -329,7 +327,6 @@ function disconnect(error) {
   pendingScan = null;
   pendingVolumes.clear();
   window.clearTimeout(scanTimer);
-  ui.retry.disabled = false;
   syncRows([]);
   showStatus(ui.status, error.includes('not found') || error.includes('forbidden')
     ? 'Install the Cast Volume helper, then refresh.'
@@ -373,7 +370,7 @@ function createDemoPort() {
         }
         const receiver = receivers.find(item => item.id === message.id && item.session === message.session);
         if (!receiver) {
-          receive({ok: false, error: 'Demo receiver unavailable.'});
+          receive({ok: false, error: 'Receiver unavailable.'});
           return;
         }
         receiver.level = message.level;
@@ -383,15 +380,8 @@ function createDemoPort() {
   };
 }
 
-if (DEMO_MODE) {
-  document.querySelector('h1').textContent = 'Cast volume demo';
-  ui.retry.setAttribute('aria-label', 'Refresh demo devices');
-}
-ui.retry.title = DEMO_MODE
-  ? 'Refresh demo devices. Shift-click to return to real casts.'
-  : 'Refresh receivers. Shift-click to try demo devices.';
 ui.retry.addEventListener('click', event => {
-  if (event.shiftKey) {
+  if (event.ctrlKey && event.shiftKey) {
     const url = new URL(location.href);
     if (DEMO_MODE) url.searchParams.delete('demo');
     else url.searchParams.set('demo', '1');
