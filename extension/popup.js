@@ -69,7 +69,7 @@ function saveOrder() {
 }
 
 function beginReorder(row, event) {
-  if (event.button !== 0 || reorderDrag) return;
+  if (event.button !== 0 || reorderDrag || rows.size < 2) return;
   event.preventDefault();
   reorderDrag = {
     row, pointerId: event.pointerId, startY: event.clientY, moved: false, order: visibleOrder(),
@@ -114,7 +114,7 @@ function finishReorder(cancelled = false, pointerId) {
 }
 
 function reorderWithKeys(row, event) {
-  if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+  if (rows.size < 2 || (event.key !== 'ArrowUp' && event.key !== 'ArrowDown')) return;
   event.preventDefault();
   if (reorderDrag) return;
   const element = row.element;
@@ -154,7 +154,6 @@ function createRow(receiver) {
     name: element.querySelector('.device-name'),
     deviceIcon: element.querySelector('.device-icon'),
     groupIcon: element.querySelector('.group-icon'),
-    handle: element.querySelector('.drag-handle'),
     slider: element.querySelector('input'),
     value: element.querySelector('.volume-value'),
     detail: element.querySelector('.detail'),
@@ -164,8 +163,8 @@ function createRow(receiver) {
   rows.set(receiver.id, row);
   element.dataset.receiverId = receiver.id;
   ui.receivers.append(element);
-  row.handle.addEventListener('pointerdown', event => beginReorder(row, event));
-  row.handle.addEventListener('keydown', event => reorderWithKeys(row, event));
+  row.name.addEventListener('pointerdown', event => beginReorder(row, event));
+  row.name.addEventListener('keydown', event => reorderWithKeys(row, event));
 
   row.slider.addEventListener('pointerdown', event => {
     if (row.slider.disabled || event.button !== 0) return;
@@ -192,8 +191,7 @@ function renderRow(row) {
   setText(row.name, receiver.name);
   row.deviceIcon.toggleAttribute('hidden', receiver.isGroup === true);
   row.groupIcon.toggleAttribute('hidden', receiver.isGroup !== true);
-  row.name.title = receiver.isGroup ? 'Speaker group' : 'Cast device';
-  row.handle.setAttribute('aria-label', `Reorder ${receiver.name}`);
+  row.name.setAttribute('aria-label', `Reorder ${receiver.name}`);
   slider.setAttribute('aria-label', `Volume for ${receiver.name}`);
   slider.disabled = !receiver.adjustable;
   if (slider.valueAsNumber !== (level ?? 0)) slider.value = level ?? 0;
@@ -226,6 +224,7 @@ function syncRows(receivers) {
     row.receiver = receiver;
     renderRow(row);
   }
+  for (const row of rows.values()) row.name.disabled = rows.size < 2;
   applyOrder();
   ui.receivers.hidden = !rows.size;
 }

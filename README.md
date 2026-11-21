@@ -32,10 +32,9 @@ Start casting as usual, then click _Cast Volume_. Each active receiver has its
 own volume slider. Use the refresh button to rescan.
 
 Speaker groups have a speaker-group icon. When several receivers are active,
-hover over a name row briefly to reveal its faint handle, then drag it to
-reorder the list. The order is saved across
+drag a device or speaker-group name to reorder the list. The order is saved across
 the popup, separate window, and side panel, including when a receiver is
-temporarily inactive. You can also focus a handle and use the up/down arrows.
+temporarily inactive. You can also focus a name and use the up/down arrows.
 
 To test the list with dummy devices, hold Shift and click the refresh button.
 Demo mode shows five simulated receivers, including two speaker groups, with

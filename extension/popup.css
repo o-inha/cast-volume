@@ -41,7 +41,7 @@ button {
   cursor: pointer;
 }
 
-button:hover:not(:disabled) { background: var(--divider); color: var(--text); }
+button:not(.device-name):hover:not(:disabled) { background: var(--divider); color: var(--text); }
 button:disabled { opacity: .5; cursor: default; }
 
 #receivers { margin: 0; padding: 0; list-style: none; }
@@ -53,25 +53,25 @@ button:disabled { opacity: .5; cursor: default; }
 
 .receiver-row { gap: 10px; min-height: 24px; }
 .receiver-icon { flex: none; color: var(--accent); }
-.device-name { flex: 1; min-width: 0; overflow-wrap: anywhere; font-weight: 530; }
-.drag-handle {
-  flex: none;
-  margin-left: auto;
+.device-name {
+  display: block;
+  flex: 1;
+  min-width: 0;
   padding: 0;
-  color: var(--muted);
-  opacity: 0;
+  border-radius: 0;
+  color: var(--text);
+  font: inherit;
+  font-weight: 530;
+  text-align: left;
+  overflow-wrap: anywhere;
   cursor: grab;
   touch-action: none;
-  transition: opacity 120ms ease;
+  user-select: none;
 }
-.receiver-row:hover .drag-handle { opacity: .35; transition-delay: 600ms; }
-.receiver-row .drag-handle:focus-visible { opacity: .35; transition-delay: 0s; }
-.drag-handle:hover:not(:disabled) { background: transparent; color: var(--muted); }
-.receiver.is-dragging .drag-handle { opacity: .55; cursor: grabbing; transition-delay: 0s; }
-#receivers > .receiver:only-child .drag-handle { display: none; }
+.device-name:disabled { opacity: 1; cursor: default; touch-action: auto; }
+.receiver.is-dragging .device-name { cursor: grabbing; }
 .receiver.is-dragging { opacity: .7; }
 #receivers.is-reordering { user-select: none; }
-@media (hover: none) { .drag-handle { opacity: .35; } }
 .volume-row { gap: 12px; margin-top: 5px; }
 
 input[type="range"] {
