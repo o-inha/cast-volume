@@ -41,7 +41,7 @@ button {
   cursor: pointer;
 }
 
-button:hover:not(:disabled) { background: var(--divider); color: var(--text); }
+button:not(.device-name):hover:not(:disabled) { background: var(--divider); color: var(--text); }
 button:disabled { opacity: .5; cursor: default; }
 
 #receivers { margin: 0; padding: 0; list-style: none; }
@@ -52,8 +52,26 @@ button:disabled { opacity: .5; cursor: default; }
 }
 
 .receiver-row { gap: 10px; min-height: 24px; }
-.receiver-row svg { flex: none; color: var(--accent); }
-.device-name { overflow-wrap: anywhere; font-weight: 530; }
+.receiver-icon { flex: none; color: var(--accent); }
+.device-name {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border-radius: 0;
+  color: var(--text);
+  font: inherit;
+  font-weight: 530;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.device-name:disabled { opacity: 1; cursor: default; touch-action: auto; }
+.receiver.is-dragging .device-name { cursor: grabbing; }
+.receiver.is-dragging { opacity: .7; }
+#receivers.is-reordering { user-select: none; }
 .volume-row { gap: 12px; margin-top: 5px; }
 
 input[type="range"] {

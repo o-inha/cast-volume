@@ -45,6 +45,7 @@ def receiver_view(device, session, status):
     return {
         'id': device['id'],
         'name': device['name'],
+        'isGroup': device.get('is_group', False),
         'session': session,
         'level': round(level * 100) if has_level else None,
         'muted': volume.get('muted') is True,
