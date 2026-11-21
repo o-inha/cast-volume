@@ -31,8 +31,9 @@ Some streaming services, such as [Pluto TV channels](https://pluto.tv) and [Raku
 Start casting as usual, then click _Cast Volume_. Each active receiver has its
 own volume slider. Use the refresh button to rescan.
 
-Speaker groups have a speaker-group icon. Hover over a receiver and drag the
-faint handle beside its name to reorder the list. The order is saved across
+Speaker groups have a speaker-group icon. When several receivers are active,
+hover over a name row briefly to reveal its faint handle, then drag it to
+reorder the list. The order is saved across
 the popup, separate window, and side panel, including when a receiver is
 temporarily inactive. You can also focus a handle and use the up/down arrows.
 
