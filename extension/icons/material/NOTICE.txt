@@ -1,0 +1,10 @@
+Google Material Icons, Copyright Google LLC.
+Licensed under the Apache License, Version 2.0. See LICENSE in this folder.
+
+Original SVGs are included here for the inline speaker_group and drag_handle
+icons and the rasterized toolbar volume_up icons. The toolbar artwork uses
+the existing cyan color and a cropped viewBox to enlarge the visible glyph.
+
+https://github.com/google/material-design-icons/blob/master/src/hardware/speaker_group/materialicons/24px.svg
+https://github.com/google/material-design-icons/blob/master/src/editor/drag_handle/materialicons/24px.svg
+https://github.com/google/material-design-icons/blob/master/src/av/volume_up/materialicons/24px.svg

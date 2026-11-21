@@ -2,6 +2,7 @@ const HOST = 'jp.inha.cast_volume';
 const SCAN_INTERVAL = 2500;
 const REDISCOVER_INTERVAL = 12000;
 const RETRY_INTERVAL = 850;
+const ORDER_KEY = 'receiverOrder';
 
 const ui = {
   status: document.getElementById('status'),
@@ -17,6 +18,115 @@ let inFlight;
 let pendingScan = null;
 let scanTimer;
 let lastDiscovery = 0;
+let receiverOrder = [];
+let reorderDrag = null;
+let deferredOrder = null;
+let orderWrite = Promise.resolve();
+
+function cleanOrder(value) {
+  return Array.isArray(value) ? [...new Set(value.filter(id => typeof id === 'string'))] : [];
+}
+
+function visibleOrder() {
+  return Array.from(ui.receivers.children, element => element.dataset.receiverId);
+}
+
+function moveRow(element, before) {
+  // moveBefore preserves focus and pointer state on current Chrome versions.
+  if (ui.receivers.moveBefore) ui.receivers.moveBefore(element, before);
+  else {
+    const focused = document.activeElement;
+    ui.receivers.insertBefore(element, before);
+    if (element.contains(focused)) focused.focus({preventScroll: true});
+  }
+}
+
+function applyOrder() {
+  if (reorderDrag) return;
+  const positions = new Map(receiverOrder.map((id, index) => [id, index]));
+  const ordered = [...rows.values()].sort((a, b) =>
+    (positions.get(a.receiver.id) ?? Infinity) - (positions.get(b.receiver.id) ?? Infinity));
+  ordered.forEach((row, index) => {
+    if (ui.receivers.children[index] !== row.element) {
+      moveRow(row.element, ui.receivers.children[index] ?? null);
+    }
+  });
+}
+
+function saveOrder() {
+  const visible = visibleOrder();
+  const active = new Set(visible);
+  let index = 0;
+  // Keep inactive receivers in their saved slots until they return.
+  receiverOrder = receiverOrder.map(id => active.has(id) ? visible[index++] : id)
+    .concat(visible.slice(index));
+  const saved = receiverOrder.slice();
+  orderWrite = orderWrite.then(() => chrome.storage.local.set({[ORDER_KEY]: saved})).catch(error => {
+    console.warn('Could not save receiver order.', error);
+    showStatus(ui.status, 'Could not save the receiver order. Try moving an item again.');
+  });
+}
+
+function beginReorder(row, event) {
+  if (event.button !== 0 || reorderDrag) return;
+  event.preventDefault();
+  reorderDrag = {
+    row, pointerId: event.pointerId, startY: event.clientY, moved: false, order: visibleOrder(),
+  };
+  // Capture on the list so moving a receiver row keeps the pointer captured.
+  ui.receivers.setPointerCapture(event.pointerId);
+}
+
+function moveReorder(event) {
+  const drag = reorderDrag;
+  if (!drag || event.pointerId !== drag.pointerId) return;
+  if (!drag.moved && Math.abs(event.clientY - drag.startY) < 4) return;
+  drag.moved = true;
+  event.preventDefault();
+  ui.receivers.classList.add('is-reordering');
+  drag.row.element.classList.add('is-dragging');
+  const before = Array.from(ui.receivers.children).find(element => {
+    if (element === drag.row.element) return false;
+    const bounds = element.getBoundingClientRect();
+    return event.clientY < bounds.top + bounds.height / 2;
+  }) ?? null;
+  if (drag.row.element.nextElementSibling !== before) moveRow(drag.row.element, before);
+  // Keep the last items reachable when the receiver list scrolls.
+  if (event.clientY < 28) window.scrollBy(0, -12);
+  else if (event.clientY > window.innerHeight - 28) window.scrollBy(0, 12);
+}
+
+function finishReorder(cancelled = false, pointerId) {
+  const drag = reorderDrag;
+  if (!drag || (pointerId != null && pointerId !== drag.pointerId)) return;
+  reorderDrag = null;
+  ui.receivers.classList.remove('is-reordering');
+  drag.row.element.classList.remove('is-dragging');
+  if (ui.receivers.hasPointerCapture(drag.pointerId)) ui.receivers.releasePointerCapture(drag.pointerId);
+  if (deferredOrder) {
+    receiverOrder = deferredOrder;
+    deferredOrder = null;
+  }
+  const changed = !cancelled && drag.moved && visibleOrder().join('\n') !== drag.order.join('\n');
+  if (changed) saveOrder();
+  applyOrder();
+}
+
+function reorderWithKeys(row, event) {
+  if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+  event.preventDefault();
+  if (reorderDrag) return;
+  const element = row.element;
+  if (event.key === 'ArrowUp') {
+    if (!element.previousElementSibling) return;
+    moveRow(element, element.previousElementSibling);
+  } else {
+    const next = element.nextElementSibling;
+    if (!next) return;
+    moveRow(element, next.nextElementSibling);
+  }
+  saveOrder();
+}
 
 function sameSession(a, b) {
   return a && b && a.id === b.id && a.session === b.session;
@@ -41,6 +151,9 @@ function createRow(receiver) {
     receiver,
     element,
     name: element.querySelector('.device-name'),
+    deviceIcon: element.querySelector('.device-icon'),
+    groupIcon: element.querySelector('.group-icon'),
+    handle: element.querySelector('.drag-handle'),
     slider: element.querySelector('input'),
     value: element.querySelector('.volume-value'),
     detail: element.querySelector('.detail'),
@@ -48,7 +161,10 @@ function createRow(receiver) {
     error: '',
   };
   rows.set(receiver.id, row);
+  element.dataset.receiverId = receiver.id;
   ui.receivers.append(element);
+  row.handle.addEventListener('pointerdown', event => beginReorder(row, event));
+  row.handle.addEventListener('keydown', event => reorderWithKeys(row, event));
 
   row.slider.addEventListener('pointerdown', event => {
     if (row.slider.disabled || event.button !== 0) return;
@@ -73,6 +189,10 @@ function renderRow(row) {
   }
 
   setText(row.name, receiver.name);
+  row.deviceIcon.toggleAttribute('hidden', receiver.isGroup === true);
+  row.groupIcon.toggleAttribute('hidden', receiver.isGroup !== true);
+  row.name.title = receiver.isGroup ? 'Speaker group' : 'Cast device';
+  row.handle.setAttribute('aria-label', `Reorder ${receiver.name}`);
   slider.setAttribute('aria-label', `Volume for ${receiver.name}`);
   slider.disabled = !receiver.adjustable;
   if (slider.valueAsNumber !== (level ?? 0)) slider.value = level ?? 0;
@@ -89,6 +209,7 @@ function renderRow(row) {
 
 function syncRows(receivers) {
   const active = new Set(receivers.map(receiver => receiver.id));
+  if (reorderDrag && !active.has(reorderDrag.row.receiver.id)) finishReorder(true);
   for (const [id, row] of rows) {
     if (active.has(id)) continue;
     row.element.remove();
@@ -104,6 +225,7 @@ function syncRows(receivers) {
     row.receiver = receiver;
     renderRow(row);
   }
+  applyOrder();
   ui.receivers.hidden = !rows.size;
 }
 
@@ -232,4 +354,24 @@ ui.retry.addEventListener('click', () => requestScan(true));
 window.addEventListener('pointerup', event => finishDrag(event.pointerId));
 window.addEventListener('pointercancel', event => finishDrag(event.pointerId));
 window.addEventListener('blur', () => finishDrag());
-requestScan(true);
+window.addEventListener('pointermove', moveReorder);
+window.addEventListener('pointerup', event => finishReorder(false, event.pointerId));
+window.addEventListener('pointercancel', event => finishReorder(true, event.pointerId));
+window.addEventListener('blur', () => finishReorder(true));
+window.addEventListener('keydown', event => {
+  if (event.key === 'Escape') finishReorder(true);
+});
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== 'local' || !changes[ORDER_KEY]) return;
+  const nextOrder = cleanOrder(changes[ORDER_KEY].newValue);
+  if (reorderDrag) deferredOrder = nextOrder;
+  else {
+    receiverOrder = nextOrder;
+    applyOrder();
+  }
+});
+chrome.storage.local.get(ORDER_KEY).then(saved => {
+  receiverOrder = cleanOrder(saved[ORDER_KEY]);
+}).catch(error => {
+  console.warn('Could not read receiver order.', error);
+}).finally(() => requestScan(true));

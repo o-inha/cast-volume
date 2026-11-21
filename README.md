@@ -31,6 +31,14 @@ Some streaming services, such as [Pluto TV channels](https://pluto.tv) and [Raku
 Start casting as usual, then click _Cast Volume_. Each active receiver has its
 own volume slider. Use the refresh button to rescan.
 
+Speaker groups have a speaker-group icon. Hover over a receiver and drag the
+faint handle beside its name to reorder the list. The order is saved across
+the popup, separate window, and side panel, including when a receiver is
+temporarily inactive. You can also focus a handle and use the up/down arrows.
+
+After updating, run the helper setup command again and reload the extension
+at `chrome://extensions` to enable speaker-group detection.
+
 The button next to refresh moves Cast Volume to a separate window, then to
 Chrome's side panel, then back to the toolbar popup. The separate window stays
 open when you switch tabs or focus another window. The full cycle requires

@@ -98,6 +98,16 @@ def _receiver_id(instance, fields):
     return advertised or "mdns-" + instance[0].hex()
 
 
+def _is_group(fields):
+    model = fields.get(b"md", "").strip().casefold()
+    capabilities = fields.get(b"ca", "")
+    # The ca TXT field is a decimal capability bitmask. Bit 5 identifies a
+    # multizone group, while individual speakers advertise their own model.
+    return model == "google cast group" or (
+        capabilities.isdecimal() and bool(int(capabilities) & (1 << 5))
+    )
+
+
 class _Discovery:
     def __init__(self):
         self.instances = {}
@@ -166,7 +176,10 @@ class _Discovery:
             fields = self.text.get(instance, {})
             device_id = _receiver_id(instance, fields)
             name = fields.get(b"fn", "").strip() or original[0].decode("utf-8", errors="replace")
-            device = {"id": device_id, "name": name, "host": host, "port": port}
+            device = {
+                "id": device_id, "name": name, "host": host, "port": port,
+                "is_group": _is_group(fields),
+            }
             rank = (addresses[host], not bool(fields.get(b"fn")), host)
             if device_id not in devices or rank < devices[device_id][0]:
                 devices[device_id] = (rank, device)

@@ -52,8 +52,23 @@ button:disabled { opacity: .5; cursor: default; }
 }
 
 .receiver-row { gap: 10px; min-height: 24px; }
-.receiver-row svg { flex: none; color: var(--accent); }
-.device-name { overflow-wrap: anywhere; font-weight: 530; }
+.receiver-icon { flex: none; color: var(--accent); }
+.device-name { flex: 1; min-width: 0; overflow-wrap: anywhere; font-weight: 530; }
+.drag-handle {
+  flex: none;
+  margin-left: auto;
+  padding: 0;
+  color: var(--muted);
+  opacity: 0;
+  cursor: grab;
+  touch-action: none;
+}
+.receiver:hover .drag-handle, .drag-handle:focus-visible { opacity: .35; }
+.drag-handle:hover:not(:disabled) { background: transparent; color: var(--muted); opacity: .55; }
+.receiver.is-dragging .drag-handle { opacity: .55; cursor: grabbing; }
+.receiver.is-dragging { opacity: .7; }
+#receivers.is-reordering { user-select: none; }
+@media (hover: none) { .drag-handle { opacity: .35; } }
 .volume-row { gap: 12px; margin-top: 5px; }
 
 input[type="range"] {
