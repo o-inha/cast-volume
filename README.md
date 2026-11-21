@@ -32,22 +32,19 @@ Start casting as usual, then click _Cast Volume_. Each active receiver has its
 own volume slider. Volumes update automatically. Use the refresh button to
 search for receivers immediately.
 
+**macOS:** allow Local Network access for Chrome if prompted. If discovery
+fails, check _System Settings > Privacy & Security > Local Network_ and allow
+_Chrome_ if listed.
+
 Speaker groups have a speaker-group icon. When several receivers are active,
 drag a device or speaker-group name to reorder the list. The order is saved across
 the popup, separate window, and side panel, including when a receiver is
 temporarily inactive. You can also focus a name and use the up/down arrows.
 
-After updating, run the helper setup command again and reload the extension
-at `chrome://extensions` to enable speaker-group detection.
-
-The button next to refresh moves Cast Volume to a separate window, then to
+The button on the left side of refresh moves Cast Volume to a separate window, then to
 Chrome's side panel, then back to the toolbar popup. The separate window stays
 open when you switch tabs or focus another window. The full cycle requires
 Chrome 141 or newer.
-
-**macOS only:** allow Local Network access for Chrome if prompted. If discovery
-fails, check _System Settings > Privacy & Security > Local Network_ and allow
-_Chrome_ if listed.
 
 The helper discovers active receivers on the same local network. It cannot
 identify which browser started a session. Moving the slider adjusts the Cast
